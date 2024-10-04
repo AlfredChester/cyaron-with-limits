@@ -11,6 +11,9 @@ class GraderRegistry:
     def invoke(self, name, content, std):
         return self._registry[name](content, std)
 
+    def invoke_spj(self, name, input, content, std):
+        return self._registry[name](input, content, std)
+
     def check(self, name):
         return name in self._registry
 

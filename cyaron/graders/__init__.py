@@ -1,4 +1,5 @@
-from .graderregistry import CYaRonGraders
+from .grader_registry import CYaRonGraders
 
-from .fulltext import fulltext
+from .full_text import full_text
 from .noipstyle import noipstyle
+from .special_judge import testlib_spj

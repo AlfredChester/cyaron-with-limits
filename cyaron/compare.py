@@ -32,6 +32,15 @@ class Compare:
             raise CompareMismatch(name, info)
 
     @staticmethod
+    def __compare_two_spj(input, name, content, std, grader):
+        (result, info) = CYaRonGraders.invoke_spj(grader, input, content, std)
+        status = "Correct" if result else "!!!INCORRECT!!!"
+        info = info if info is not None else ""
+        log.debug("{}: {} {}".format(name, status, info))
+        if not result:
+            raise CompareMismatch(name, info)
+
+    @staticmethod
     def __process_file(file):
         if isinstance(file, IO):
             file.flush_buffer()
@@ -60,14 +69,29 @@ class Compare:
                 ("max_workers", -1),
                 ("job_pool", None),
                 ("stop_on_incorrect", None),
+                ("input", None),
             ),
         )
         std = kwargs["std"]
         grader = kwargs["grader"]
         max_workers = kwargs["max_workers"]
         job_pool = kwargs["job_pool"]
+        # treat input as an IO object, just like Compare.program
+        input = kwargs["input"]
+
         if kwargs["stop_on_incorrect"] is not None:
             log.warn("parameter stop_on_incorrect is deprecated and has no effect.")
+
+        if "spj" in grader and input is None:
+            raise ValueError("input must be passed when grader is a spj.")
+
+        if input is not None:
+            input.flush_buffer()
+            input.input_file.seek(0)
+            if not isinstance(input, IO):
+                raise TypeError(
+                    "expect {}, got {}".format(type(IO).__name__, type(input).__name__)
+                )
 
         if (max_workers is None or max_workers >= 0) and job_pool is None:
             max_workers = cls.__normal_max_workers(max_workers)
@@ -95,7 +119,12 @@ class Compare:
 
         def do(file):
             (file_name, content) = cls.__process_file(file)
-            cls.__compare_two(file_name, content, std, grader)
+            if "spj" in grader:
+                cls.__compare_two_spj(
+                    input.input_file.name, file_name, content, std, grader
+                )
+            else:
+                cls.__compare_two(file_name, content, std, grader)
 
         if job_pool is not None:
             job_pool.map(do, files)
@@ -217,7 +246,13 @@ class Compare:
                         )
                     )
                 input_file.seek(0)
-            cls.__compare_two(program_name, content, std, grader)
+            # TODO write in document that the keyword 'spj' should not appear in the user-registered grader
+            if "spj" in grader:
+                cls.__compare_two_spj(
+                    input.input_file.name, program_name, content, std, grader
+                )
+            else:
+                cls.__compare_two(program_name, content, std, grader)
 
         if job_pool is not None:
             job_pool.map(do, programs)

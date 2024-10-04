@@ -1,30 +1,30 @@
 def ati(array):
     """ati(array) -> list
-        Convert all the elements in the array and return them in a list.
+    Convert all the elements in the array and return them in a list.
     """
     return [int(i) for i in array]
 
 
 def list_like(data):
     """list_like(data) -> bool
-        Judge whether the object data is like a list or a tuple.
-        object data -> the data to judge
+    Judge whether the object data is like a list or a tuple.
+    object data -> the data to judge
     """
     return isinstance(data, tuple) or isinstance(data, list)
 
 
 def int_like(data):
-    isint = False
+    is_int = False
     try:
-        isint = isint or isinstance(data, long)
+        is_int = is_int or isinstance(data, long)
     except NameError:
         pass
-    isint = isint or isinstance(data, int)
-    return isint
+    is_int = is_int or isinstance(data, int)
+    return is_int
 
 
-def strtolines(str):
-    lines = str.split('\n')
+def str_to_lines(str):
+    lines = str.split("\n")
     for i in range(len(lines)):
         lines[i] = lines[i].rstrip()
 
@@ -35,6 +35,7 @@ def strtolines(str):
 
 def make_unicode(data):
     return str(data)
+
 
 def unpack_kwargs(funcname, kwargs, arg_pattern):
     rv = {}
@@ -55,7 +56,15 @@ def unpack_kwargs(funcname, kwargs, arg_pattern):
             except KeyError as e:
                 error = True
             if error:
-                raise TypeError('{}() missing 1 required keyword-only argument: \'{}\''.format(funcname, tp))
+                raise TypeError(
+                    "{}() missing 1 required keyword-only argument: '{}'".format(
+                        funcname, tp
+                    )
+                )
     if kwargs:
-        raise TypeError('{}() got an unexpected keyword argument \'{}\''.format(funcname, next(iter(kwargs.items()))[0]))
+        raise TypeError(
+            "{}() got an unexpected keyword argument '{}'".format(
+                funcname, next(iter(kwargs.items()))[0]
+            )
+        )
     return rv
